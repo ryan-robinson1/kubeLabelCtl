@@ -50,7 +50,7 @@ func convStringsToMap(strArr []string) (map[string]string, error) {
 	return strMap, nil
 }
 
-/* initClientSet scans for a kubernetes config file in the local '/.kube' diretory. If one is found, it uses it to create and return a
+/* initClientSet scans for a kubernetes config file in the local '.kube' diretory. If one is found, it uses it to create and return a
    kubernetes.Clientset struct (https://pkg.go.dev/k8s.io/client-go/kubernetes#Clientset) */
 func initClientSet() (kubernetes.Clientset, error) {
 
