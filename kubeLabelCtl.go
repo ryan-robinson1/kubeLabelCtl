@@ -1,8 +1,8 @@
 /*
 	Ryan Robinson, 2021
 
-	kubeLabelCtl is a lightweight command line tool built using the client-go API that can retreive kubernetes deployments by their labels 
-	and then set/get some of their attributes. Currently, kubeLabelCtl can set/get deployment scales from labels, get deployment names from 
+	kubeLabelCtl is a lightweight command line tool built using the client-go API that can retreive kubernetes deployments by their labels
+	and then set/get some of their attributes. Currently, kubeLabelCtl can set/get deployment scales from labels, get deployment names from
 	labels, and get the number of deployments in a given namespace with specified labels.
 */
 
@@ -54,7 +54,7 @@ func convStringsToMap(strArr []string) (map[string]string, error) {
    kubernetes.Clientset struct (https://pkg.go.dev/k8s.io/client-go/kubernetes#Clientset) */
 func initClientSet() (kubernetes.Clientset, error) {
 
-	//Scaning for kubernetes .config in local /.kube directory
+	//Scaning for kubernetes .config in local .kube directory
 	rules := clientcmd.NewDefaultClientConfigLoadingRules()
 
 	//Creates a clientcmd.ClientConfig struct which is used to create a *rest.Config struct
@@ -64,7 +64,7 @@ func initClientSet() (kubernetes.Clientset, error) {
 	if err != nil {
 		return kubernetes.Clientset{}, err
 	}
-	
+
 	//Attempts to create a kubernetes.Clientset struct from 'config,' panics if failure
 	return *kubernetes.NewForConfigOrDie(config), nil
 }
