@@ -64,6 +64,7 @@ func initClientSet() (kubernetes.Clientset, error) {
 	if err != nil {
 		return kubernetes.Clientset{}, err
 	}
+	
 	//Attempts to create a kubernetes.Clientset struct from 'config,' panics if failure
 	return *kubernetes.NewForConfigOrDie(config), nil
 }
