@@ -2,7 +2,7 @@
 # KubeLabelCtl
 
 ## Overview
-KubeLabelCtl is a lightweight command line tool built using the [client-go kubernetes API](https://pkg.go.dev/k8s.io/client-go). It can retreive kubernetes deployments by their labels and then set/get some of their attributes. KubeLabelCtl was primarily built as an example use case of client-go.
+KubeLabelCtl is a lightweight command line tool built using the [client-go kubernetes API](https://pkg.go.dev/k8s.io/client-go). It can retreive kubernetes deployments by their labels and then set/get deployment attributes KubeLabelCtl was primarily built as an example use case of client-go.
 ## Getting Started
 ### Dependencies
 * Kubernetes Engine (minikube, k3s, etc...)
