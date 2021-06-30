@@ -83,7 +83,7 @@ func GetDeploymentNameWithLabels(labels map[string]string, namespace string) (st
 	}
 
 	//Loops through all deployments. If the given labels match a deployment's labels, return the deployment name
-	//TODO: Make kubeLabelCtl work functions work with multiple deployments at once
+	//TODO: Make kubeLabelCtl functions work with multiple deployments at once
 	depName := ""
 	numDeps := 0
 	for _, deps := range deployments.Items {
