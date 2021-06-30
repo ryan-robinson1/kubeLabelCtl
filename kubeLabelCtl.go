@@ -71,8 +71,6 @@ func initClientSet() (kubernetes.Clientset, error) {
 /* getDeploymentNameWithLabels searches the given namespace for deployments that contain the labels specified in the labels map.
    If a deployment is found that contains the labels speciifed in the map, the function returns the name of the deployment */
 func GetDeploymentNameWithLabels(labels map[string]string, namespace string) (string, error) {
-	//kubectl labels: kubectl label deployments usmc1-pte webInterface.group=usmc
-	//expose.group, expose.name
 	clientset, err := initClientSet()
 	if err != nil {
 		return "", err
