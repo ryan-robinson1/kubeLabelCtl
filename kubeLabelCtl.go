@@ -1,9 +1,9 @@
 /*
 	Ryan Robinson, 2021
 
-	kubeLabelCtl is a lightweight command line tool built using the client-go API that can retreive kubernetes deployments by their labels and then set/get some of their attributes.
-	Currently, kubeLabelCtl can set/get deployment scales from labels, get deployment names from labels, and get the number of deployments
-	in a given namespace with specified labels.
+	kubeLabelCtl is a lightweight command line tool built using the client-go API that can retreive kubernetes deployments by their labels 
+	and then set/get some of their attributes. Currently, kubeLabelCtl can set/get deployment scales from labels, get deployment names from 
+	labels, and get the number of deployments in a given namespace with specified labels.
 */
 
 package main
