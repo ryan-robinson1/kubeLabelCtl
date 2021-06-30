@@ -2,13 +2,13 @@
 # KubeLabelCtl
 
 ## Overview
-KubeLabelCtl is a lightweight command line tool built using the [client-go kubernetes API](https://pkg.go.dev/k8s.io/client-go). It can retreive kubernetes deployments by their labels and then set/get deployment attributes KubeLabelCtl was primarily built as an example use case of client-go.
+KubeLabelCtl is a lightweight command line tool built using the [client-go kubernetes API](https://pkg.go.dev/k8s.io/client-go). It can retreive kubernetes deployments by their labels and then set/get deployment attributes. KubeLabelCtl was primarily built as an example use case of client-go.
 ## Getting Started
 ### Dependencies
 * Kubernetes Engine (minikube, k3s, etc...)
 * Kubectl or another kubernetes interface
 ### Installation
-* ``git clone https://github.com/ ``
+* ``git clone https://github.com/ryan-robinson1/kubeLabelCtl.git ``
 ### Setup
 * KubeLabelCtl needs a local version of your kube config file in order to interface with kubernetes. On CentOS 7 you can find this file in your home directory here: ``~/.kube/config``. Copy the config file into this repository's local ``.kube`` directory.
 * Because KubeLabelCtl is built to access deployments from their labels, you'll need to make sure your deployments have labels. Assuming you have a kubernetes cluster running, use ``kubectl get deployments -n myNamespace --show-labels`` to get the deployment names and their labels. 
