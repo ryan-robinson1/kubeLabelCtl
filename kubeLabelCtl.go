@@ -15,6 +15,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 
 	v1 "k8s.io/api/autoscaling/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -22,10 +23,6 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-func isNumeric(s string) bool {
-	_, err := strconv.ParseInt(s, 10, 32)
-	return err == nil
-}
 func isSubset(subset map[string]string, set map[string]string) bool {
 	for key, val := range subset {
 		if set[key] != val {
@@ -35,19 +32,25 @@ func isSubset(subset map[string]string, set map[string]string) bool {
 	return true
 }
 
-/* Takes a string array of format {key, key, value, value, ...} and returns a map of format {key: value, key: value, ...} {key value} */
+/* convStringsToMap takes a string array of format {key=value, key=value ...} and returns a map of format {key: value, key: value, ...} */
 func convStringsToMap(strArr []string) (map[string]string, error) {
-	if len(strArr)%2 != 0 {
-		return nil, errors.New("args: label argument has unmatched pair")
-	}
 	strMap := make(map[string]string)
-	keys := strArr[:len(strArr)/2]
-	vals := strArr[len(strArr)/2:]
-
-	for i := 0; i < len(strArr)/2; i++ {
-		strMap[keys[i]] = vals[i]
+	for _, str := range strArr {
+		if len(str) < 3 || !strings.Contains(str, "=") {
+			return nil, errors.New("Error: invalid label argument(s)")
+		}
+		dL := strings.Index(str, "=")
+		strMap[str[:dL]] = str[dL+1:]
 	}
 	return strMap, nil
+}
+
+/* kubeCmd is a struct that holds all required arguments to execute a kubeLabelCtl command. */
+type kubeCmd struct {
+	cmd       string
+	labels    map[string]string
+	scale     int32
+	namespace string
 }
 
 /* initClientSet scans for a kubernetes config file in the local '.kube' diretory. If one is found, it uses it to create and return a
@@ -176,72 +179,90 @@ func GetNumDeploymentsWithLabels(labels map[string]string, namespace string) (in
 	return counter, nil
 }
 
-//TODO: doCommand() function. parseArgs shouldn't handle command logic. Use switch statement
-//TODO: command line args should look like "key=val"
-/* Takes the array of command line arguments, parses them, and returns a function that can execute the requested action */
-func parseArgs(args []string) (func(), error) {
-	if args[0] == "getNumWithLabels" {
-		return func() {
-			labels, err := convStringsToMap(args[1 : len(args)-1])
-			if err != nil {
-				log.Fatalln(err)
-			}
-			num, err := GetNumDeploymentsWithLabels(labels, args[len(args)-1])
-			if err != nil {
-				log.Fatalln(err)
-			}
-			fmt.Println(num)
-		}, nil
-	} else if args[0] == "getName" {
-		return func() {
-			labels, err := convStringsToMap(args[1 : len(args)-1])
-			if err != nil {
-				log.Fatalln(err)
-			}
-			name, err := GetDeploymentNameWithLabels(labels, args[len(args)-1])
-			if err != nil {
-				log.Fatalln(err)
-			}
-			fmt.Println(name)
-		}, nil
-	} else if args[0] == "getScale" {
-		return func() {
-			labels, err := convStringsToMap(args[1 : len(args)-1])
-			if err != nil {
-				log.Fatalln(err)
-			}
-			scale, err := GetDeploymentScaleWithLabels(labels, args[len(args)-1])
-			if err != nil {
-				log.Fatalln(err)
-			}
-			fmt.Println(strconv.Itoa(scale))
-		}, nil
-	} else if args[0] == "setScale" {
-		return func() {
-			if !isNumeric(args[len(args)-2]) {
-				panic(errors.New("args: setScale requires an integer scale value"))
-			}
-			labels, err := convStringsToMap(args[1 : len(args)-2])
-			if err != nil {
-				log.Fatalln(err)
-			}
-			scale, err := strconv.ParseInt(args[len(args)-2], 10, 32)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			SetDeploymentScale(labels, int32(scale), args[len(args)-1])
-
-		}, nil
+/* doCommand takes a kubeCmd struct and executes the command it specifies */
+func doCommand(args kubeCmd) {
+	switch args.cmd {
+	case "empty":
+		fmt.Println("A lightweight command line tool that can get Kubernetes deployments by their labels and retrieve/modify their attributes. Reference README for arguments.")
+	case "getNumWithLabels":
+		num, err := GetNumDeploymentsWithLabels(args.labels, args.namespace)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		fmt.Println(num)
+	case "getName":
+		name, err := GetDeploymentNameWithLabels(args.labels, args.namespace)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		fmt.Println(name)
+	case "getScale":
+		scale, err := GetDeploymentScaleWithLabels(args.labels, args.namespace)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		fmt.Println(strconv.Itoa(scale))
+	case "setScale":
+		_, err := SetDeploymentScale(args.labels, args.scale, args.namespace)
+		if err != nil {
+			log.Fatalln(err)
+		}
+	case "error":
+		log.Fatalln(errors.New("args: cannot read arguments"))
 	}
-	return nil, errors.New("args: cannot read arguments")
 }
 
-//TODO: Handle zero args
-func main() {
-	args := os.Args[1:]
-	action, err := parseArgs(args)
-	if err != nil {
-		log.Fatalln(err)
+/* getCommand takes an array of arguments, usually from os.Args, and returns the command (conventionally the second arg). If there is not
+   a second argument, getCommand returns the string "empty" */
+func getCommand(osArgs []string) string {
+	if len(osArgs) < 2 {
+		return "empty"
 	}
-	action()
+	return osArgs[1]
+}
+
+/* parseArgs parses an array of arguments, usually from os.Args, and returns a kubeCmd struct containing all the relevant arguments */
+func parseArgs(osArgs []string) kubeCmd {
+	cmd := getCommand(osArgs)
+	args := kubeCmd{}
+	args.cmd = cmd
+
+	switch cmd {
+	case "getNumWithLabels", "getName", "getScale":
+		if len(osArgs) < 4 {
+			args.cmd = "error"
+			break
+		}
+		labels, err := convStringsToMap(osArgs[2 : len(osArgs)-1])
+		if err != nil {
+			log.Fatalln(err)
+		}
+		args.labels = labels
+		args.namespace = osArgs[len(osArgs)-1]
+		args.scale = -1
+	case "setScale":
+		if len(osArgs) < 5 {
+			args.cmd = "error"
+			break
+		}
+		labels, err := convStringsToMap(osArgs[2 : len(osArgs)-2])
+		if err != nil {
+			log.Fatalln(err)
+		}
+		scale, err := strconv.ParseInt(osArgs[len(osArgs)-2], 10, 32)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		args.labels = labels
+		args.namespace = osArgs[len(osArgs)-1]
+		args.scale = int32(scale)
+	default:
+		args.cmd = "error"
+	}
+
+	return args
+}
+
+func main() {
+	doCommand(parseArgs(os.Args))
 }

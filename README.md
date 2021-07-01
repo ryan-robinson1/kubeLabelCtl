@@ -27,12 +27,15 @@ KubeLabelCtl is a lightweight command line tool built using the [client-go kuber
 
 ## Usage
 All kubeLabelCtl commands take one or more  key-value label pairs and a namespace.
-<pre>$ ./kubeLabelCtl getName <span style="color:magenta"><i><b>LABEL_KEY</b></i></span> ... <span style="color:magenta"><i><b>LABEL_VALUE</b></i></span> ... <span style="color:magenta"><i><b>NAMESPACE</b></i></span> </pre>
-<pre>$ ./kubeLabelCtl getScale <span style="color:magenta"><i><b>LABEL_KEY</b></i></span> ... <span style="color:magenta"><i><b>LABEL_VALUE</b></i></span> ... <span style="color:magenta"><i><b>NAMESPACE</b></i></span> </pre>
-<pre>$ ./kubeLabelCtl getNumWithLabels <span style="color:magenta"><i><b>LABEL_KEY</b></i></span> ... <span style="color:magenta"><i><b>LABEL_VALUE</b></i></span> ... <span style="color:magenta"><i><b>NAMESPACE</b></i></span> </pre>
+<pre>$ ./kubeLabelCtl getName <span style="color:magenta"><i><b>LABEL_KEY</b></i></span>=<span style="color:magenta"><i><b>LABEL_VALUE</b></i></span> ... <span style="color:magenta"><i><b>NAMESPACE</b></i></span> </pre>
+<pre>$ ./kubeLabelCtl getScale <span style="color:magenta"><i><b>LABEL_KEY</b></i></span>=<span style="color:magenta"><i><b>LABEL_VALUE</b></i></span> ... <span style="color:magenta"><i><b>NAMESPACE</b></i></span> </pre>
+<pre>$ ./kubeLabelCtl getNumWithLabels <span style="color:magenta"><i><b>LABEL_KEY</b></i></span>=<span style="color:magenta"><i><b>LABEL_VALUE</b></i></span> ... <span style="color:magenta"><i><b>NAMESPACE</b></i></span> </pre>
 
 The setScale command also requires an integer scale value to set the scale to.
-<pre>$ ./kubeLabelCtl setScale <span style="color:magenta"><i><b>LABEL_KEY</b></i></span> ... <span style="color:magenta"><i><b>LABEL_VALUE</b></i></span> ... <span style="color:magenta"><i><b>SCALE_VALUE NAMESPACE</b></i></span> </pre>
+<pre>$ ./kubeLabelCtl setScale <span style="color:magenta"><i><b>LABEL_KEY</b></i></span>=<span style="color:magenta"><i><b>LABEL_VALUE</b></i></span> ... <span style="color:magenta"><i><b>SCALE_VALUE NAMESPACE</b></i></span> </pre>
+##Example
+``./kubeLabelCtl getName  myLabel1=value1 myLabel2=value2 myNamespace
+``
 
 
 ---
