@@ -35,8 +35,9 @@ The setScale command also requires an integer scale value to set the scale to.
 <pre>$ ./kubeLabelCtl setScale <span style="color:magenta"><i><b>LABEL_KEY</b></i></span>=<span style="color:magenta"><i><b>LABEL_VALUE</b></i></span> ... <span style="color:magenta"><i><b>SCALE_VALUE NAMESPACE</b></i></span> </pre>
 
 ## Example
-``./kubeLabelCtl getName  myLabel1=value1 myLabel2=value2 myNamespace
-``
+    $ ./kubeLabelCtl getName myLabel1=value1 myLabel2=value2 myNamespace
+    myConnector
+ 
 
 
 ---
