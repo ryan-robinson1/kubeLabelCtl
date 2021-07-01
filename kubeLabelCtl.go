@@ -105,7 +105,7 @@ func GetDeploymentNameWithLabels(labels map[string]string, namespace string) (st
 }
 
 /* setDeploymentScale finds the deployment in the given namespace with the given labels, and then scales it to 'scale.'
-   Returns a v1.Scale struct (https://pkg.go.dev/k8s.io/api/autoscaling/v1#Scale) */
+   Returns an autoscalingv1.Scale struct (https://pkg.go.dev/k8s.io/api/autoscaling/v1#Scale) */
 func SetDeploymentScale(labels map[string]string, scale int32, namespace string) (*v1.Scale, error) {
 	deploymentName, err := GetDeploymentNameWithLabels(labels, namespace)
 	if err != nil {
@@ -117,15 +117,15 @@ func SetDeploymentScale(labels map[string]string, scale int32, namespace string)
 	}
 
 	//Gets the deployment with the given name in the given namespace
-	deployment, err := clientset.AppsV1().Deployments(namespace).GetScale(context.Background(), deploymentName, metav1.GetOptions{})
+	deploymentScale, err := clientset.AppsV1().Deployments(namespace).GetScale(context.Background(), deploymentName, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
 
 	//Sets the deployment replica number to the value 'scale' and then updates the scale of the deployment
-	deploymentPoiner := *deployment
-	deploymentPoiner.Spec.Replicas = scale
-	v1scale, err := clientset.AppsV1().Deployments(namespace).UpdateScale(context.Background(), deploymentName, &deploymentPoiner, metav1.UpdateOptions{})
+	deploymentScalePoiner := *deploymentScale
+	deploymentScalePoiner.Spec.Replicas = scale
+	v1scale, err := clientset.AppsV1().Deployments(namespace).UpdateScale(context.Background(), deploymentName, &deploymentScalePoiner, metav1.UpdateOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -146,11 +146,11 @@ func GetDeploymentScaleWithLabels(labels map[string]string, namespace string) (i
 	}
 
 	//Gets the deployment with the given name in the given namespace
-	deployment, err := clientset.AppsV1().Deployments(namespace).GetScale(context.Background(), deploymentName, metav1.GetOptions{})
+	deploymentScale, err := clientset.AppsV1().Deployments(namespace).GetScale(context.Background(), deploymentName, metav1.GetOptions{})
 	if err != nil {
 		return -1, err
 	}
-	return int(deployment.Spec.Replicas), nil
+	return int(deploymentScale.Spec.Replicas), nil
 }
 
 /* getNumDeploymentsWithLabels returns the count of the number of deployments that contain the given labels in the given namespace */
@@ -176,6 +176,8 @@ func GetNumDeploymentsWithLabels(labels map[string]string, namespace string) (in
 	return counter, nil
 }
 
+//TODO: doCommand() function. parseArgs shouldn't handle command logic. Use switch statement
+//TODO: command line args should look like "key=val"
 /* Takes the array of command line arguments, parses them, and returns a function that can execute the requested action */
 func parseArgs(args []string) (func(), error) {
 	if args[0] == "getNumWithLabels" {
