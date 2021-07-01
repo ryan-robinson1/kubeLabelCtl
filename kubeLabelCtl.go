@@ -236,6 +236,7 @@ func parseArgs(args []string) (func(), error) {
 	return nil, errors.New("args: cannot read arguments")
 }
 
+//TODO: Handle zero args
 func main() {
 	args := os.Args[1:]
 	action, err := parseArgs(args)
