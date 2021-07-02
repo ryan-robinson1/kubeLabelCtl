@@ -5,7 +5,8 @@
 	and then set/get some of their attributes. Currently, kubeLabelCtl can set/get deployment scales from labels, get deployment names from
 	labels, and get the number of deployments in a given namespace with specified labels.
 
-	TODO: Create label getters/setters, add getting/setting by name func
+	TODO: Add On/Off/Reset functions that can be accessed by name or label, add unit tests and integration tests, update readme, maybe allow
+		  name and label targeting at the same time
 */
 
 package main
@@ -44,12 +45,33 @@ func isSubset(subset map[string]string, set map[string]string) bool {
 	return true
 }
 
+//TODO: Maybe allow both name and label targeting at the same time?
+/* checkMap returns true if string array is in format {key=value, key=value ...} and false otherwise */
+func checkMap(strArr []string) (bool, error) {
+	dLCounter := 0
+	for _, str := range strArr {
+		if strings.Contains(str, "=") {
+			dLCounter++
+		} else {
+			dLCounter--
+		}
+	}
+	switch dLCounter {
+	case len(strArr):
+		return true, nil
+	case -len(strArr):
+		return false, nil
+	default:
+		return false, errors.New("error: arguments must be either labels or names, not both")
+	}
+}
+
 /* convStringsToMap takes a string array of format {key=value, key=value ...} and returns a map of format {key: value, key: value, ...} */
 func convStringsToMap(strArr []string) (map[string]string, error) {
 	strMap := make(map[string]string)
 	for _, str := range strArr {
 		if len(str) < 3 || !strings.Contains(str, "=") {
-			return nil, errors.New("Error: invalid label argument(s)")
+			return nil, errors.New("error: invalid label argument(s)")
 		}
 		dL := strings.Index(str, "=")
 		strMap[str[:dL]] = str[dL+1:]
@@ -61,6 +83,7 @@ func convStringsToMap(strArr []string) (map[string]string, error) {
 type kubeCmd struct {
 	cmd       string
 	labels    map[string]string
+	names     []string
 	scale     int32
 	namespace string
 }
@@ -82,6 +105,19 @@ func initClientSet() (kubernetes.Clientset, error) {
 
 	//Attempts to create a kubernetes.Clientset struct from 'config,' panics if failure
 	return *kubernetes.NewForConfigOrDie(config), nil
+}
+
+/* getNames takes a map of labels and an array of names. If the name argument is nil, getNames uses the labels to fetch each deployment's
+   name and returns an array of names. Otherwise, get names just returns the unchanged names argument */
+func getNames(labels map[string]string, names []string, namespace string) ([]string, error) {
+	if names != nil {
+		return names, nil
+	}
+	deploymentNames, err := GetDeploymentNamesWithLabels(labels, namespace)
+	if err != nil {
+		return nil, err
+	}
+	return deploymentNames, nil
 }
 
 /* getDeploymentNameWithLabels searches the given namespace for deployments that contain the labels specified in the labels map
@@ -106,19 +142,19 @@ func GetDeploymentNamesWithLabels(labels map[string]string, namespace string) ([
 		}
 	}
 	if len(names) == 0 {
-		return nil, errors.New("Error: Deployment does not exist")
+		return nil, errors.New("error: deployment does not exist")
 	}
 	return names, nil
 }
 
-/* getDeploymentScaleWithLabels finds the deployments in the given namespace with the given labels and then returns
-   a map mapping deployment names to their current scales */
-func GetDeploymentScalesWithLabels(labels map[string]string, namespace string) (map[string]string, error) {
+/* getDeploymentScaleWithLabels finds the deployments in the given namespace with the given labels or names in the
+   names array and then returns a map mapping deployment names to their current scales */
+func GetDeploymentScales(labels map[string]string, names []string, namespace string) (map[string]string, error) {
 	clientset, err := initClientSet()
 	if err != nil {
 		return nil, err
 	}
-	deploymentNames, err := GetDeploymentNamesWithLabels(labels, namespace)
+	deploymentNames, err := getNames(labels, names, namespace)
 	if err != nil {
 		return nil, err
 	}
@@ -139,10 +175,10 @@ func GetDeploymentScalesWithLabels(labels map[string]string, namespace string) (
 	return scales, nil
 }
 
-/* setDeploymentScale finds the deployments in the given namespace with the given labels, and then scales them to 'scale.'
+/* setDeploymentScale finds the deployments in the given namespace with the given labels or names and then scales them to 'scale.'
    Returns an array of autoscalingv1.Scale structs (https://pkg.go.dev/k8s.io/api/autoscaling/v1#Scale) */
-func SetDeploymentScales(labels map[string]string, scale int32, namespace string) ([]*v1.Scale, error) {
-	deploymentNames, err := GetDeploymentNamesWithLabels(labels, namespace)
+func SetDeploymentScales(labels map[string]string, names []string, scale int32, namespace string) ([]*v1.Scale, error) {
+	deploymentNames, err := getNames(labels, names, namespace)
 	if err != nil {
 		return nil, err
 	}
@@ -201,26 +237,26 @@ func doCommand(args kubeCmd) {
 	switch args.cmd {
 	case "empty":
 		fmt.Println("A lightweight command line tool that can target Kubernetes deployments by their labels and retrieve/modify their attributes. Reference README for arguments.")
-	case "getNumWithLabels":
+	case "getNumWithLabel":
 		num, err := GetNumDeploymentsWithLabels(args.labels, args.namespace)
 		if err != nil {
 			log.Fatalln(err)
 		}
 		fmt.Println(num)
-	case "getNames":
+	case "getName":
 		names, err := GetDeploymentNamesWithLabels(args.labels, args.namespace)
 		if err != nil {
 			log.Fatalln(err)
 		}
 		printArr(names)
-	case "getScales":
-		scales, err := GetDeploymentScalesWithLabels(args.labels, args.namespace)
+	case "getScale":
+		scales, err := GetDeploymentScales(args.labels, args.names, args.namespace)
 		if err != nil {
 			log.Fatalln(err)
 		}
 		printMap(scales)
-	case "setScales":
-		_, err := SetDeploymentScales(args.labels, args.scale, args.namespace)
+	case "setScale":
+		_, err := SetDeploymentScales(args.labels, args.names, args.scale, args.namespace)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -238,6 +274,24 @@ func getCommand(osArgs []string) string {
 	return osArgs[1]
 }
 
+/* parseTargetArgs takes an array of arguments that are either in map format {key:value, key:value...} or array format {value, value} and
+   returns the data correctly formatted in a map or array. It returns nil for the data structure that the array argument is not */
+func parseTargetArgs(args []string) (labels map[string]string, names []string, err error) {
+	isMap, err := checkMap(args)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	if isMap {
+		labels, err := convStringsToMap(args)
+		if err != nil {
+			return nil, nil, err
+		}
+		return labels, nil, nil
+	} else {
+		return nil, args, nil
+	}
+}
+
 /* parseArgs parses an array of arguments, usually from os.Args, and returns a kubeCmd struct containing all the relevant arguments */
 func parseArgs(osArgs []string) kubeCmd {
 	cmd := getCommand(osArgs)
@@ -245,7 +299,7 @@ func parseArgs(osArgs []string) kubeCmd {
 	args.cmd = cmd
 
 	switch cmd {
-	case "getNumWithLabels", "getName", "getScale":
+	case "getNumWithLabels", "getNames":
 		if len(osArgs) < 4 {
 			args.cmd = "error"
 			break
@@ -257,20 +311,31 @@ func parseArgs(osArgs []string) kubeCmd {
 		args.labels = labels
 		args.namespace = osArgs[len(osArgs)-1]
 		args.scale = -1
+	case "getScale":
+		if len(osArgs) < 4 {
+			args.cmd = "error"
+			break
+		}
+		err := error(nil)
+		args.labels, args.names, err = parseTargetArgs(osArgs[2 : len(osArgs)-1])
+		if err != nil {
+			log.Fatalln(err)
+		}
+		args.namespace = osArgs[len(osArgs)-1]
+		args.scale = -1
 	case "setScale":
 		if len(osArgs) < 5 {
 			args.cmd = "error"
 			break
 		}
-		labels, err := convStringsToMap(osArgs[2 : len(osArgs)-2])
-		if err != nil {
-			log.Fatalln(err)
-		}
 		scale, err := strconv.ParseInt(osArgs[len(osArgs)-2], 10, 32)
 		if err != nil {
 			log.Fatalln(err)
 		}
-		args.labels = labels
+		args.labels, args.names, err = parseTargetArgs(osArgs[2 : len(osArgs)-2])
+		if err != nil {
+			log.Fatalln(err)
+		}
 		args.namespace = osArgs[len(osArgs)-1]
 		args.scale = int32(scale)
 	default:
