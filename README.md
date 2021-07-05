@@ -18,41 +18,32 @@ KubeToggler is a lightweight command line tool built using the [client-go kubern
 
 ---
 ### toggleOn
- <font size="3">Toggles on the deployments that contain the specified labels or names by setting their scales to 1</font> 
+ <font size="3">Toggles on the deployments that contain the specified labels or names by setting their scales to 1</font> <pre>$ ./kubeToggler toggleOn {<span style="color:magenta"><i><b>LABEL_KEY</b></i></span>=<span style="color:magenta"><i><b>LABEL_VALUE</b></i></span>|<span style="color:magenta"><i><b>DEPLOYMENT_NAME</b></i></span>} ... <span style="color:magenta"><i><b>NAMESPACE</b></i></span> </pre>
 
 ### toggleOff
- <font size="3">Toggles off the deployments that contain the specified labels or names by setting their scales to 0</font> 
+ <font size="3">Toggles off the deployments that contain the specified labels or names by setting their scales to 0</font> <pre>$ ./kubeToggler toggleOff {<span style="color:magenta"><i><b>LABEL_KEY</b></i></span>=<span style="color:magenta"><i><b>LABEL_VALUE</b></i></span>|<span style="color:magenta"><i><b>DEPLOYMENT_NAME</b></i></span>} ... <span style="color:magenta"><i><b>NAMESPACE</b></i></span> </pre>
 
 ### reset
- <font size="3">Resets the deployments that contain the specified labels or names by setting their scales to 0 and then back to 1</font> 
+ <font size="3">Resets the deployments that contain the specified labels or names by setting their scales to 0 and then back to 1</font> <pre>$ ./kubeToggler reset {<span style="color:magenta"><i><b>LABEL_KEY</b></i></span>=<span style="color:magenta"><i><b>LABEL_VALUE</b></i></span>|<span style="color:magenta"><i><b>DEPLOYMENT_NAME</b></i></span>} ... <span style="color:magenta"><i><b>NAMESPACE</b></i></span> </pre>
 
 #### getName 
- <font size="3">Retrieves the name of the deployments that contain the specified labels</font> 
+ <font size="3">Retrieves the name of the deployments that contain the specified labels</font> <pre>$ ./kubeToggler getName <span style="color:magenta"><i><b>LABEL_KEY</b></i></span>=<span style="color:magenta"><i><b>LABEL_VALUE</b></i></span> ... <span style="color:magenta"><i><b>NAMESPACE</b></i></span> </pre>
 
 #### getNumWithLabels
- <font size="3">Retrieves the number of deployments in a namespace that contain the specified labels </font> 
+ <font size="3">Retrieves the number of deployments in a namespace that contain the specified labels </font> <pre>$ ./kubeToggler getNumWithLabels <span style="color:magenta"><i><b>LABEL_KEY</b></i></span>=<span style="color:magenta"><i><b>LABEL_VALUE</b></i></span> ... <span style="color:magenta"><i><b>NAMESPACE</b></i></span> </pre>
 
  #### getScale
- <font size="3">Retrieves the scale of the deployments that contain the specified labels or names</font>  
+ <font size="3">Retrieves the scale of the deployments that contain the specified labels or names</font>  <pre>$ ./kubeToggler getScale {<span style="color:magenta"><i><b>LABEL_KEY</b></i></span>=<span style="color:magenta"><i><b>LABEL_VALUE</b></i></span>|<span style="color:magenta"><i><b>DEPLOYMENT_NAME</b></i></span>} ... <span style="color:magenta"><i><b>NAMESPACE</b></i></span> </pre>
 
 
 #### setScale
- <font size="3">Sets the scale of the deployments that contain the specified labels or names</font> 
+ <font size="3">Sets the scale of the deployments that contain the specified labels or names. </font> <pre>$ ./kubeToggler setScale {<span style="color:magenta"><i><b>LABEL_KEY</b></i></span>=<span style="color:magenta"><i><b>LABEL_VALUE</b></i></span>|<span style="color:magenta"><i><b>DEPLOYMENT_NAME</b></i></span>} ... <span style="color:magenta"><i><b>SCALE_VALUE NAMESPACE</b></i></span> </pre>
 
-
-## Usage
->All kubeToggler commands take one or more  key-value label pairs and a namespace.
-<pre>$ ./kubeToggler toggleOn {<span style="color:magenta"><i><b>LABEL_KEY</b></i></span>=<span style="color:magenta"><i><b>LABEL_VALUE</b></i></span>|<span style="color:magenta"><i><b>DEPLOYMENT_NAME</b></i></span>} ... <span style="color:magenta"><i><b>NAMESPACE</b></i></span> </pre>
-<pre>$ ./kubeToggler toggleOff {<span style="color:magenta"><i><b>LABEL_KEY</b></i></span>=<span style="color:magenta"><i><b>LABEL_VALUE</b></i></span>|<span style="color:magenta"><i><b>DEPLOYMENT_NAME</b></i></span>} ... <span style="color:magenta"><i><b>NAMESPACE</b></i></span> </pre>
-<pre>$ ./kubeToggler reset {<span style="color:magenta"><i><b>LABEL_KEY</b></i></span>=<span style="color:magenta"><i><b>LABEL_VALUE</b></i></span>|<span style="color:magenta"><i><b>DEPLOYMENT_NAME</b></i></span>} ... <span style="color:magenta"><i><b>NAMESPACE</b></i></span> </pre>
-<pre>$ ./kubeToggler getName <span style="color:magenta"><i><b>LABEL_KEY</b></i></span>=<span style="color:magenta"><i><b>LABEL_VALUE</b></i></span> ... <span style="color:magenta"><i><b>NAMESPACE</b></i></span> </pre>
-<pre>$ ./kubeToggler getNumWithLabels <span style="color:magenta"><i><b>LABEL_KEY</b></i></span>=<span style="color:magenta"><i><b>LABEL_VALUE</b></i></span> ... <span style="color:magenta"><i><b>NAMESPACE</b></i></span> </pre>
-<pre>$ ./kubeToggler getScale {<span style="color:magenta"><i><b>LABEL_KEY</b></i></span>=<span style="color:magenta"><i><b>LABEL_VALUE</b></i></span>|<span style="color:magenta"><i><b>DEPLOYMENT_NAME</b></i></span>} ... <span style="color:magenta"><i><b>NAMESPACE</b></i></span> </pre>
->The setScale command also requires an integer scale value to set the scale to.
-<pre>$ ./kubeToggler setScale {<span style="color:magenta"><i><b>LABEL_KEY</b></i></span>=<span style="color:magenta"><i><b>LABEL_VALUE</b></i></span>|<span style="color:magenta"><i><b>DEPLOYMENT_NAME</b></i></span>} ... <span style="color:magenta"><i><b>SCALE_VALUE NAMESPACE</b></i></span> </pre>
 
 ## Examples
-    $ ./kubeToggler getName myLabel1=value1 myLabel2=value2 myNamespace
+    $ ./kubeToggler toggleOn myLabel1=value1 myNamespace
+
+    $ ./kubeToggler getName myLabel1=value1 myLabel2=value2 myLabel3=value3 myNamespace
     myConnector
     
     $ ./kubeToggler getScale myLabel1=value1 myLabel2=value2 myNamespace
@@ -60,6 +51,10 @@ KubeToggler is a lightweight command line tool built using the [client-go kubern
     
     $ ./kubeToggler getScale myConnector myNamespace
     myConnector: 1
+
+    $ ./kubeToggler setScale myConnector 1 myNamespace
+
+
  
 
 
