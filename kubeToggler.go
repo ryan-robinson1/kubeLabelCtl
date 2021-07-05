@@ -45,11 +45,18 @@ func isSubset(subset map[string]string, set map[string]string) bool {
 	return true
 }
 
-/* checkMap returns true if string array is in format {key=value, key=value ...} and false otherwise */
+/* checkMap returns true if an array is in this format {key=value, key=value ...} and false otherwise */
 func checkMap(strArr []string) (bool, error) {
 	dLCounter := 0
+	if len(strArr) == 0 {
+		return false, errors.New("error: empty array")
+	}
 	for _, str := range strArr {
-		if strings.Contains(str, "=") {
+
+		//Makes sure there isnt an empty string on any side of the equals sign
+		if strings.Contains(str, "=") && (str[0] == '=' || str[len(str)-1] == '=') {
+			return false, errors.New("error: invalid label argument(s)")
+		} else if strings.Contains(str, "=") {
 			dLCounter++
 		} else {
 			dLCounter--
@@ -69,7 +76,7 @@ func checkMap(strArr []string) (bool, error) {
 func convStringsToMap(strArr []string) (map[string]string, error) {
 	strMap := make(map[string]string)
 	for _, str := range strArr {
-		if len(str) < 3 || !strings.Contains(str, "=") {
+		if str[0] == '=' || str[len(str)-1] == '=' || !strings.Contains(str, "=") {
 			return nil, errors.New("error: invalid label argument(s)")
 		}
 		dL := strings.Index(str, "=")
@@ -106,19 +113,6 @@ func initClientSet() (kubernetes.Clientset, error) {
 	return *kubernetes.NewForConfigOrDie(config), nil
 }
 
-/* getNames takes a map of labels and an array of names. If the name argument is nil, getNames uses the labels to fetch each deployment's
-   name and returns an array of names. Otherwise, get names just returns the unchanged names argument */
-func getNames(labels map[string]string, names []string, namespace string) ([]string, error) {
-	if names != nil {
-		return names, nil
-	}
-	deploymentNames, err := GetDeploymentNamesWithLabels(labels, namespace)
-	if err != nil {
-		return nil, err
-	}
-	return deploymentNames, nil
-}
-
 /* getDeploymentNameWithLabels searches the given namespace for deployments that contain the labels specified in the labels map
    and returns a slice of all their names */
 func GetDeploymentNamesWithLabels(labels map[string]string, namespace string) ([]string, error) {
@@ -144,6 +138,19 @@ func GetDeploymentNamesWithLabels(labels map[string]string, namespace string) ([
 		return nil, errors.New("error: deployment does not exist")
 	}
 	return names, nil
+}
+
+/* getNames takes a map of labels and an array of names. If the name argument is nil, getNames uses the labels to fetch each deployment's
+   name and returns an array of names. Otherwise, get names just returns the unchanged names argument */
+func getNames(labels map[string]string, names []string, namespace string) ([]string, error) {
+	if names != nil {
+		return names, nil
+	}
+	deploymentNames, err := GetDeploymentNamesWithLabels(labels, namespace)
+	if err != nil {
+		return nil, err
+	}
+	return deploymentNames, nil
 }
 
 /* getDeploymentScaleWithLabels finds the deployments in the given namespace with the given labels or names in the
