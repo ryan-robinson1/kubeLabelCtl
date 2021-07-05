@@ -24,7 +24,7 @@ kubeToggler is a lightweight command line tool built using the [client-go kubern
  <font size="3">Toggles off the deployments that contain the specified labels or names by setting their scales to 0</font> 
 
 ### reset
- <font size="3">Resets the deployments that contain the specified labels or names by setting their scales to 0 and then immediately back to 1</font> 
+ <font size="3">Resets the deployments that contain the specified labels or names by setting their scales to 0 and then back to 1</font> 
 
 #### getName 
  <font size="3">Retrieves the name of the deployments that contain the specified labels</font> 
