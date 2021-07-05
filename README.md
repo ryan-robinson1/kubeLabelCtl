@@ -1,8 +1,6 @@
 
 # KubeLabelCtl
 ## Overview
-Note: Out of date readme
-
 KubeLabelCtl is a lightweight command line tool built using the [client-go kubernetes API](https://pkg.go.dev/k8s.io/client-go). It can target kubernetes deployments by their labels and then set/get deployment attributes. KubeLabelCtl was primarily built as an example use case of client-go.
 ## Getting Started
 ### Dependencies
@@ -17,27 +15,36 @@ KubeLabelCtl is a lightweight command line tool built using the [client-go kuber
 * To add labels to your deployments, you can use ``kubectl label deployments -n myNamespace myDeployment myLabel=label1``
 
 ## Commands
-#### getNames 
+#### getName 
  <font size="3">Retrieves the name of the deployments that contain the specified labels</font> 
-#### getScales
- <font size="3">Retrieves the scale of the deployments that contain the specified labels</font>  
+
 #### getNumWithLabels
  <font size="3">Retrieves the number of deployments in a namespace that contain the specified labels </font> 
-#### setScales
- <font size="3">Sets the scale of the deployments that contain the specified labels</font> 
+
+ #### getScale
+ <font size="3">Retrieves the scale of the deployments that contain the specified labels or names</font>  
+
+#### setScale
+ <font size="3">Sets the scale of the deployments that contain the specified labels or names</font> 
 
 ## Usage
-All kubeLabelCtl commands take one or more  key-value label pairs and a namespace.
-<pre>$ ./kubeLabelCtl getNames <span style="color:magenta"><i><b>LABEL_KEY</b></i></span>=<span style="color:magenta"><i><b>LABEL_VALUE</b></i></span> ... <span style="color:magenta"><i><b>NAMESPACE</b></i></span> </pre>
-<pre>$ ./kubeLabelCtl getScales <span style="color:magenta"><i><b>LABEL_KEY</b></i></span>=<span style="color:magenta"><i><b>LABEL_VALUE</b></i></span> ... <span style="color:magenta"><i><b>NAMESPACE</b></i></span> </pre>
+>All kubeLabelCtl commands take one or more  key-value label pairs and a namespace.
+<pre>$ ./kubeLabelCtl getName <span style="color:magenta"><i><b>LABEL_KEY</b></i></span>=<span style="color:magenta"><i><b>LABEL_VALUE</b></i></span> ... <span style="color:magenta"><i><b>NAMESPACE</b></i></span> </pre>
+
 <pre>$ ./kubeLabelCtl getNumWithLabels <span style="color:magenta"><i><b>LABEL_KEY</b></i></span>=<span style="color:magenta"><i><b>LABEL_VALUE</b></i></span> ... <span style="color:magenta"><i><b>NAMESPACE</b></i></span> </pre>
+<pre>$ ./kubeLabelCtl getScale {<span style="color:magenta"><i><b>LABEL_KEY</b></i></span>=<span style="color:magenta"><i><b>LABEL_VALUE</b></i></span>|<span style="color:magenta"><i><b>DEPLOYMENT_NAME</b></i></span>} ... <span style="color:magenta"><i><b>NAMESPACE</b></i></span> </pre>
+>The setScale command also requires an integer scale value to set the scale to.
+<pre>$ ./kubeLabelCtl setScale {<span style="color:magenta"><i><b>LABEL_KEY</b></i></span>=<span style="color:magenta"><i><b>LABEL_VALUE</b></i></span>|<span style="color:magenta"><i><b>DEPLOYMENT_NAME</b></i></span>} ... <span style="color:magenta"><i><b>SCALE_VALUE NAMESPACE</b></i></span> </pre>
 
-The setScale command also requires an integer scale value to set the scale to.
-<pre>$ ./kubeLabelCtl setScales <span style="color:magenta"><i><b>LABEL_KEY</b></i></span>=<span style="color:magenta"><i><b>LABEL_VALUE</b></i></span> ... <span style="color:magenta"><i><b>SCALE_VALUE NAMESPACE</b></i></span> </pre>
-
-## Example
-    $ ./kubeLabelCtl getNames myLabel1=value1 myLabel2=value2 myNamespace
+## Examples
+    $ ./kubeLabelCtl getName myLabel1=value1 myLabel2=value2 myNamespace
     myConnector
+    
+    $ ./kubeLabelCtl getScale myLabel1=value1 myLabel2=value2 myNamespace
+    myConnector:1
+    
+    $ ./kubeLabelCtl getScale myConnector myNamespace
+    myConnector:1
  
 
 
