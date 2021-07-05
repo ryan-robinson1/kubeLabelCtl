@@ -1,4 +1,4 @@
-module kubeLabelCtl
+module kubeToggler
 
 go 1.15
 
