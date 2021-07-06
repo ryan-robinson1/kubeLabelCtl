@@ -5,23 +5,27 @@
 	and then set/get some of their attributes. Currently, kubeToggler can set/get deployment scales from labels, get deployment names from
 	labels, and get the number of deployments in a given namespace with specified labels.
 
-	TODO: Add unit tests and integration tests, maybe allow
-		  name and label targeting at the same time
+	TODO: Add unit tests and integration tests, retrieve logging, maybe figure out how to get uptime (maybe put timestamp on label)
 */
 
 package main
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	v1 "k8s.io/api/autoscaling/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 )
@@ -43,6 +47,14 @@ func isSubset(subset map[string]string, set map[string]string) bool {
 		}
 	}
 	return true
+}
+func getTimeElapsed(timestamp string) (time.Duration, error) {
+	pastTime, err := time.Parse("2006-01-02|15:04:05 UTC", timestamp)
+	if err != nil {
+		return 0, err
+	}
+	d := time.Now().UTC().Sub(pastTime)
+	return d, nil
 }
 
 /* checkMap returns true if an array is in this format {key=value, key=value ...} and false otherwise */
@@ -238,6 +250,99 @@ func GetNumDeploymentsWithLabels(labels map[string]string, namespace string) (in
 	return counter, nil
 }
 
+/* GetPods takes the name and namespace of a deployment and returns an array of pods currently running in that deployment */
+func getPods(deploymentName string, namespace string) ([]corev1.Pod, error) {
+	clientset, err := initClientSet()
+	if err != nil {
+		return nil, err
+	}
+	deployment, err := clientset.AppsV1().Deployments(namespace).Get(context.Background(), deploymentName, metav1.GetOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	labelMap, err := metav1.LabelSelectorAsMap(deployment.Spec.Selector)
+	if err != nil {
+		return nil, err
+	}
+	options := metav1.ListOptions{
+		LabelSelector: labels.SelectorFromSet(labelMap).String(),
+	}
+	podList, err := clientset.CoreV1().Pods(namespace).List(context.Background(), options)
+	if err != nil {
+		return nil, err
+	}
+
+	return podList.Items, nil
+}
+
+/* GetPodCreationTimestamps takes the name and namespace of a deployment and returns a map mapping the deployment's
+   pods to their time of creation. Time is formatted like 2006-01-02|15:04:05 UTC*/
+func GetPodCreationTimestamps(deploymentName string, namespace string) (map[string]string, error) {
+	pods, err := getPods(deploymentName, namespace)
+	if err != nil {
+		return nil, err
+	}
+	podTimeStamps := make(map[string]string)
+	for _, pod := range pods {
+		podTimeStamps[pod.Name] = pod.CreationTimestamp.UTC().Format("2006-01-02|15:04:05 UTC")
+	}
+	return podTimeStamps, nil
+}
+
+/* GetPodCreationTimestamps takes the name and namespace of a deployment and returns a map mapping the deployment's
+   pods to their time of creation. Time is formatted like 2006-01-02|15:04:05 UTC*/
+func GetPodLifetimes(deploymentName string, namespace string) (map[string]string, error) {
+	podTimestamps, err := GetPodCreationTimestamps(deploymentName, namespace)
+	if err != nil {
+		return nil, err
+	}
+	podLifetimes := make(map[string]string)
+	for name, timestamp := range podTimestamps {
+		duration, err := getTimeElapsed(timestamp)
+		if err != nil {
+			return nil, err
+		}
+		podLifetimes[name] = duration.String()
+	}
+	return podLifetimes, nil
+}
+
+/* GetPodCreationTimestamps takes the name and namespace of a deployment and returns a map mapping the deployment's
+   pods to their logs */
+func GetPodLogs(deploymentName string, namespace string) (map[string]string, error) {
+	clientset, err := initClientSet()
+	if err != nil {
+		return nil, err
+	}
+	pods, err := getPods(deploymentName, namespace)
+
+	podLogOpts := corev1.PodLogOptions{}
+
+	if err != nil {
+		return nil, err
+	}
+	podLogs := make(map[string]string)
+	for _, pod := range pods {
+		logs := clientset.CoreV1().Pods(namespace).GetLogs(pod.Name, &podLogOpts)
+		req, err := logs.Stream(context.Background())
+		if err != nil {
+			return nil, err
+		}
+		defer req.Close()
+
+		buf := new(bytes.Buffer)
+		_, err = io.Copy(buf, req)
+		if err != nil {
+			return nil, err
+		}
+		logStr := buf.String()
+
+		podLogs[pod.Name] = logStr
+	}
+	return podLogs, nil
+}
+
 /* doCommand takes a kubeCmd struct and executes the command it specifies */
 func doCommand(args kubeCmd) {
 	switch args.cmd {
@@ -285,7 +390,18 @@ func doCommand(args kubeCmd) {
 		if err != nil {
 			log.Fatalln(err)
 		}
-
+	case "getPodLifetimes":
+		lifetimes, err := GetPodLifetimes(args.names[0], args.namespace)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		printMap(lifetimes)
+	case "getPodLogs":
+		logs, err := GetPodLogs(args.names[0], args.namespace)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		printMap(logs)
 	case "error":
 		log.Fatalln(errors.New("args: cannot read arguments"))
 	}
@@ -364,6 +480,16 @@ func parseArgs(osArgs []string) kubeCmd {
 		}
 		args.namespace = osArgs[len(osArgs)-1]
 		args.scale = int32(scale)
+	case "getPodLogs", "getPodLifetimes":
+		if len(osArgs) != 4 {
+			args.cmd = "error"
+			break
+		}
+		names := []string{osArgs[2]}
+
+		args.names = names
+		args.namespace = osArgs[3]
+		args.scale = -1
 	default:
 		args.cmd = "error"
 	}
