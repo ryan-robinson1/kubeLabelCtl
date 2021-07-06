@@ -1,7 +1,7 @@
 
 # kubeToggler
 ## Overview
-KubeToggler is a lightweight command line tool built using the [client-go kubernetes API](https://pkg.go.dev/k8s.io/client-go). It can target kubernetes deployments by their labels or names and then set/get deployment their attributes. KubeToggler was primarily built as an example use case of client-go.
+KubeToggler is a lightweight command line tool built using the [client-go kubernetes API](https://pkg.go.dev/k8s.io/client-go). It can target kubernetes deployments by their labels or names and then set/get deployment their attributes. KubeToggler can be used as an example use case of client-go.
 ## Getting Started
 ### Dependencies
 * Kubernetes Engine (minikube, k3s, etc...)
