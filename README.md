@@ -39,6 +39,12 @@ KubeToggler is a lightweight command line tool built using the [client-go kubern
 ### setScale
  <font size="3">Sets the scale of the deployments that contain the specified labels or names. </font> <pre>$ ./kubeToggler setScale {<span style="color:magenta"><i><b>LABEL_KEY</b></i></span>=<span style="color:magenta"><i><b>LABEL_VALUE</b></i></span>|<span style="color:magenta"><i><b>DEPLOYMENT_NAME</b></i></span>} ... <span style="color:magenta"><i><b>SCALE_VALUE NAMESPACE</b></i></span> </pre>
 
+ ### getPodLogs
+ <font size="3">Gets the logs for every pod in the given deployment. </font> <pre>$ ./kubeToggler getPodLogs <span style="color:magenta"><i><b>DEPLOYMENT_NAME</b></i></span> <span style="color:magenta"><i><b>NAMESPACE</b></i></span> </pre>
+
+ ### getPodLifetimes
+ <font size="3">Gets the lifetime of every pod in the given deployment. </font> <pre>$ ./kubeToggler getPodLifetimes <span style="color:magenta"><i><b>DEPLOYMENT_NAME</b></i></span> <span style="color:magenta"><i><b>NAMESPACE</b></i></span> </pre>
+
 
 ## Examples
     $ ./kubeToggler toggleOn myLabel1=value1 myNamespace
@@ -53,6 +59,9 @@ KubeToggler is a lightweight command line tool built using the [client-go kubern
     myConnector: 1
 
     $ ./kubeToggler setScale myConnector 1 myNamespace
+
+    $ ./kubeToggler getPodLifetimes myConnector myNamespace
+    myConnector-739r8365fc-kj59m: 3h38m42.738951427s
 
 
  
