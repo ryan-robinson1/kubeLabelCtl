@@ -16,7 +16,6 @@ KubeToggler is a lightweight command line tool built using the [client-go kubern
 
 ## Commands
 
----
 ### toggleOn
  <font size="3">Toggles on the deployments that contain the specified labels or names by setting their scales to 1</font> <pre>$ ./kubeToggler toggleOn {<span style="color:magenta"><i><b>LABEL_KEY</b></i></span>=<span style="color:magenta"><i><b>LABEL_VALUE</b></i></span>|<span style="color:magenta"><i><b>DEPLOYMENT_NAME</b></i></span>} ... <span style="color:magenta"><i><b>NAMESPACE</b></i></span> </pre>
 
