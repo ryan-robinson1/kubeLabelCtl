@@ -351,7 +351,7 @@ func doCommand(args kubeCmd) {
 	switch args.cmd {
 	case "empty":
 		fmt.Println("A lightweight command line tool that can target Kubernetes deployments by their labels and retrieve/modify their attributes. Reference README for arguments.")
-	case "getNumWithLabel":
+	case "getNumWithLabels":
 		num, err := GetNumDeploymentsWithLabels(args.labels, args.namespace)
 		if err != nil {
 			log.Fatalln(err)
