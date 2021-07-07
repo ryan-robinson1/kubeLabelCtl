@@ -5,7 +5,7 @@
 	and then set/get some of their attributes. Currently, kubeToggler can set/get deployment scales from labels, get deployment names from
 	labels, and get the number of deployments in a given namespace with specified labels.
 
-	TODO: Add unit tests and integration tests, retrieve logging, maybe figure out how to get uptime (maybe put timestamp on label)
+	TODO: Add unit tests and integration tests
 */
 
 package main
@@ -155,6 +155,9 @@ func GetDeploymentNamesWithLabels(labels map[string]string, namespace string) ([
 /* getNames takes a map of labels and an array of names. If the name argument is nil, getNames uses the labels to fetch each deployment's
    name and returns an array of names. Otherwise, get names just returns the unchanged names argument */
 func getNames(labels map[string]string, names []string, namespace string) ([]string, error) {
+	if names == nil && labels == nil {
+		return nil, errors.New("error: there must be at least one targeting field (either names or labels)")
+	}
 	if names != nil {
 		return names, nil
 	}
