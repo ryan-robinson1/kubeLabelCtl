@@ -444,7 +444,7 @@ func parseArgs(osArgs []string) kubeCmd {
 	args.cmd = cmd
 
 	switch cmd {
-	case "getNumWithLabels", "getNames":
+	case "getNumWithLabels", "getName":
 		if len(osArgs) < 4 {
 			args.cmd = "error"
 			break
