@@ -49,11 +49,12 @@ func isSubset(subset map[string]string, set map[string]string) bool {
 	return true
 }
 func getTimeElapsed(timestamp string) (time.Duration, error) {
-	pastTime, err := time.Parse("2006-01-02|15:04:05 UTC", timestamp)
+	pastTime, err := time.Parse("2006-01-02|15:04 UTC", timestamp)
 	if err != nil {
 		return 0, err
 	}
 	d := time.Now().UTC().Sub(pastTime)
+
 	return d, nil
 }
 
@@ -288,7 +289,7 @@ func GetPodCreationTimestamps(deploymentName string, namespace string) (map[stri
 	}
 	podTimeStamps := make(map[string]string)
 	for _, pod := range pods {
-		podTimeStamps[pod.Name] = pod.CreationTimestamp.UTC().Format("2006-01-02|15:04:05 UTC")
+		podTimeStamps[pod.Name] = pod.CreationTimestamp.UTC().Format("2006-01-02|15:04 UTC")
 	}
 	return podTimeStamps, nil
 }
