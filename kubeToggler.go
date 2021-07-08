@@ -37,7 +37,7 @@ func printMap(m map[string]string) {
 }
 func printArr(arr []string) {
 	for _, v := range arr {
-		fmt.Println(v)
+		fmt.Print(v + " ")
 	}
 }
 func isSubset(subset map[string]string, set map[string]string) bool {
