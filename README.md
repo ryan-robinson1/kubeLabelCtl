@@ -13,6 +13,7 @@ KubeToggler is a lightweight command line tool built using the [client-go kubern
 * kubeToggler needs a local version of your kube config file in order to interface with kubernetes. On CentOS 7 you can find this file in your home directory here: ``~/.kube/config``. Copy the config file into this repository's local ``.kube`` directory.
 * Because kubeToggler is built to access deployments from their labels, you'll need to make sure your deployments have labels. Assuming you have a kubernetes cluster running, use ``kubectl get deployments -n myNamespace --show-labels`` to get the deployment names and their labels. 
 * To add labels to your deployments, you can use ``kubectl label deployments -n myNamespace myDeployment myLabel=label1``
+* To remove labels from your deployments, you can use ``kubectl label deployments -n myNamespace myDeployment myLabel-``
 
 ## Commands
 
